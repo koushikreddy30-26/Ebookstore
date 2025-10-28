@@ -1,0 +1,52 @@
+{
+  "name": "ebook-store",
+  "version": "1.0.0",
+  "description": "Full-stack MERN eBook Store with Razorpay integration",
+  "main": "server/server.js",
+  "scripts": {
+    "server": "cd server && npm start",
+    "client": "cd client && npm start",
+    "dev-server": "cd server && npm run dev",
+    "seed": "cd server && node seedBooks.js",
+    "install-server": "cd server && npm install",
+    "install-client": "cd client && npm install",
+    "install-all": "npm run install-server && npm run install-client",
+    "build-client": "cd client && npm run build"
+  },
+  "keywords": [
+    "ebook",
+    "mern",
+    "react",
+    "nodejs",
+    "express",
+    "mongodb",
+    "razorpay",
+    "ecommerce"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/ebook-store.git"
+  },
+  "dependencies": {
+    "axios": "^1.13.0",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
