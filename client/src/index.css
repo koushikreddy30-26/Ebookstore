@@ -129,3 +129,60 @@ code {
   border: 1px solid #ddd;
   border-radius: 4px;
 }
+
+/* === Authentication Page Styles === */
+
+.auth-page-container {
+  display: flex;
+  min-height: calc(100vh - 80px); /* Full height minus header */
+  width: 100%;
+  align-items: stretch;
+}
+
+.auth-image-section {
+  flex: 1;
+  background: url('https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+  background-size: cover;
+}
+
+.auth-form-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+/* Make the form container look a bit nicer */
+.auth-form-section .form {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form-section .form h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.auth-form-section .form p {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .auth-image-section {
+    display: none; /* Hide the image on small screens */
+  }
+
+  .auth-form-section {
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+}
