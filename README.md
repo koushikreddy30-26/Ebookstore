@@ -38,7 +38,6 @@ A comprehensive eBook store built with the MERN stack (MongoDB, Express, React, 
 - **QRCode** - UPI QR code generation
 
 ## Project Structure
-
 ```
 ebookstore/
 ├── client/                 # React frontend
