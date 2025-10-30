@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from './api'; // Use the configured API instance
 import { useAuth } from './AuthContext';
 
 const BookEditPage = () => {
@@ -22,7 +22,7 @@ const BookEditPage = () => {
 
   const fetchBook = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/books/${id}`);
+      const res = await api.get(`/books/${id}`);
       setFormData(res.data);
     } catch (err) {
       setError('Failed to fetch book');
@@ -48,9 +48,9 @@ const BookEditPage = () => {
     setError('');
     try {
       if (isEdit) {
-        await axios.put(`/api/books/${id}`, formData);
+        await api.put(`/books/${id}`, formData);
       } else {
-        await axios.post('/api/books', formData);
+        await api.post('/books', formData);
       }
       navigate('/admin/books');
     } catch (err) {

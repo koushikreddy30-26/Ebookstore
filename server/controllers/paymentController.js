@@ -3,8 +3,8 @@ const crypto = require('crypto');
 const Order = require('../models/Order');
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_your_key_id',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'your_key_secret'
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
 // @desc    Create Razorpay order
@@ -65,7 +65,7 @@ const verifyPayment = async (req, res) => {
                 orderStatus: 'confirmed'
             });
 
-            res.json({ message: 'Payment verified successfully' });
+            res.json({ success: true, message: 'Payment verified successfully' });
         } else {
             await Order.findByIdAndUpdate(orderId, {
                 paymentStatus: 'failed'

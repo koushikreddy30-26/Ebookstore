@@ -23,7 +23,7 @@ const Header = () => {
       <nav className="nav">
         <Link to="/">Home</Link>
         <Link to="/cart">Cart ({getCartCount()})</Link>
-        {user && <Link to="/orders">Order History</Link>}
+        {user && <Link to="/orders">Order History</Link>}/Link>} {/* Add this link */}
 
         {user ? (
           <>

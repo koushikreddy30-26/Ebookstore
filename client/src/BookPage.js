@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from './CartContext';
-import { useAuth } from './AuthContext';
 import api from './api';
 
 const BookPage = () => {
@@ -13,11 +12,11 @@ const BookPage = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
-
+  
   const fetchBook = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:5000/api/books/${id}`);
+      const res = await api.get(`/books/${id}`);
       setBook(res.data);
       setError(null);
     } catch (err) {

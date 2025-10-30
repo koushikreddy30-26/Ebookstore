@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from './api'; // Use the configured API instance
 import { useAuth } from './AuthContext';
 
 const BookListPage = () => {
@@ -18,7 +18,7 @@ const BookListPage = () => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/books');
+      const res = await api.get('/books');
       setBooks(res.data);
       setError(null);
     } catch (err) {
@@ -32,7 +32,7 @@ const BookListPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
       try {
-        await axios.delete(`/api/books/${id}`);
+        await api.delete(`/books/${id}`);
         setBooks(books.filter(book => book._id !== id));
       } catch (err) {
         setError('Failed to delete book');
