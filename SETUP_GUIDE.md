@@ -5,7 +5,6 @@ This guide will walk you through setting up the eBook Store application from scr
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
 2. [MongoDB Setup](#mongodb-setup)
-3. [Razorpay Setup](#razorpay-setup)
 4. [Server Configuration](#server-configuration)
 5. [Client Configuration](#client-configuration)
 6. [Running the Application](#running-the-application)
@@ -97,28 +96,6 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## Razorpay Setup
-
-1. **Create Razorpay Account**
-   - Go to https://razorpay.com/
-   - Click "Sign Up" and create an account
-   - Verify your email
-
-2. **Get Test Keys**
-   - Log in to Razorpay Dashboard
-   - Go to Settings → API Keys
-   - Under "Test Mode", click "Generate Test Key"
-   - Copy both:
-     - Key ID (starts with `rzp_test_`)
-     - Key Secret (keep this secret!)
-
-3. **Important Notes**
-   - Use TEST keys for development
-   - Never commit keys to version control
-   - Switch to LIVE keys only for production
-
----
-
 ## Server Configuration
 
 ### Step 1: Navigate to Server Directory
@@ -138,7 +115,6 @@ This installs:
 - jsonwebtoken (authentication)
 - cors (cross-origin requests)
 - dotenv (environment variables)
-- razorpay (payment gateway)
 
 ### Step 3: Create Environment File
 
@@ -173,17 +149,14 @@ MONGO_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/ebookstore?
 # JWT Secret (generate a random string)
 JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 
-# Razorpay Credentials (use your test keys)
-RAZORPAY_KEY_ID=rzp_test_XXXXXXXXXXXX
-RAZORPAY_KEY_SECRET=YYYYYYYYYYYYYYYYYYYY
-```
-
 **Important:**
 - Replace `username` and `password` in MONGO_URI with your MongoDB credentials
 - Generate a secure JWT_SECRET (random string, 32+ characters)
 - Add your actual Razorpay test keys
 
 ### Step 5: Seed the Database
+```
+
 
 Run the seed script to populate the database with 100 books:
 
@@ -236,25 +209,19 @@ This installs:
 - razorpay (payment SDK)
 - qrcode (QR code generation)
 
-### Step 3: Configure Razorpay in CheckoutPage
+### Step 3: Configure UPI ID (Optional)
 
-1. Open `src/CheckoutPage.js`
-2. Find line with `key: 'rzp_test_your_key_id'`
-3. Replace with your actual Razorpay Key ID:
-   ```javascript
-   key: 'rzp_test_XXXXXXXXXXXX', // Your actual key
+For UPI payments, it's best to use an environment variable.
+
+1. Create a file named `.env` in the `client` directory.
+2. Add your UPI ID to this file:
+   ```env
+   REACT_APP_MERCHANT_UPI_ID=your-upi-id@yourbank
    ```
+3. Replace `your-upi-id@yourbank` with your actual UPI ID.
+4. The application will automatically pick this up. If not set, it will use a placeholder.
 
-### Step 4: Configure UPI ID (Optional)
-
-In `CheckoutPage.js`, find:
-```javascript
-const upiId = 'merchant@upi';
-```
-
-Replace with your actual UPI ID if you want to accept UPI payments.
-
-### Step 5: Start the Client
+### Step 4: Start the Client
 
 ```bash
 npm start
@@ -299,6 +266,7 @@ The app will open in your browser at `http://localhost:3000`
 4. **Add to cart** works
 5. **Register/Login** works
 6. **Checkout** opens Razorpay popup (in test mode)
+6. **Checkout** shows options for UPI QR Code and Cash on Delivery (COD)
 
 ---
 
@@ -328,15 +296,11 @@ The app will open in your browser at `http://localhost:3000`
 
 ### Test Checkout & Payment
 
-1. Proceed to checkout
-2. Use Razorpay test credentials:
-   - **Test Card**: 4111 1111 1111 1111
-   - **CVV**: Any 3 digits
-   - **Expiry**: Any future date
-   - **Test UPI**: success@razorpay
-
-3. Complete payment
-4. Verify order appears in Order History
+1. Go to your cart and proceed to checkout.
+2. Choose the "UPI / QR Code Payment" option and click "Place Order & Generate QR".
+3. A QR code should appear. In a real scenario, you would scan this to pay.
+4. Choose the "Cash on Delivery" option and place the order.
+5. Verify that the order appears in your "Order History" page.
 
 ### Test Admin Features
 
@@ -396,17 +360,6 @@ npx kill-port 3000
 2. Clear browser localStorage
 3. Re-login
 
-### Issue: Razorpay not loading
-
-**Symptoms:**
-- "Razorpay is not defined" error
-- Payment popup doesn't open
-
-**Solutions:**
-1. Check Razorpay script in `public/index.html`
-2. Verify Razorpay key in `CheckoutPage.js`
-3. Clear browser cache
-
 ### Issue: Books not displaying
 
 **Symptoms:**
@@ -434,10 +387,7 @@ npx kill-port 3000
 **Symptoms:**
 - Payment completes but order not saved
 
-**Solutions:**
-1. Check Razorpay secret key in `.env`
-2. Verify signature verification logic
-3. Check server logs for errors
+**Solutions:** This is less likely with UPI/COD, but check server logs for errors during order creation.
 
 ---
 
@@ -447,7 +397,6 @@ Before deploying to production:
 
 1. **Environment Variables**
    - Use production MongoDB URI
-   - Switch to Razorpay LIVE keys
    - Generate new secure JWT_SECRET
    - Set NODE_ENV=production
 

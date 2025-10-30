@@ -20,7 +20,7 @@ const CheckoutPage = () => {
   }, [cartItems, navigate]);
 
   const generateUPIQR = async (orderId, amount) => {
-    const upiId = process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@upi'; // Replace with your actual UPI ID
+    const upiId = process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@yourbank'; // Replace with your actual UPI ID
     const upiUrl = `upi://pay?pa=${upiId}&pn=eBook Store&am=${amount.toFixed(2)}&cu=INR&tn=Order%20${orderId}`;
     try {
       const qrCodeDataUrl = await QRCode.toDataURL(upiUrl);
@@ -64,13 +64,13 @@ const CheckoutPage = () => {
 
       if (paymentMethod === 'upi') {
         // UPI Payment - Create order and generate QR
-        const response = await api.post('/payments/create-order', {
+        const response = await api.post('/orders/create-cod', {
           amount: total,
           items,
           paymentMethod: 'upi'
         });
         console.log('UPI Order created:', response.data);
-        await generateUPIQR(response.data.orderId, total);
+        await generateUPIQR(response.data.order._id, total);
         return;
       }
     } catch (error) {
@@ -129,8 +129,8 @@ const CheckoutPage = () => {
                 padding: '10px',
                 marginBottom: '15px',
                 color: '#8b5a00'
-              }} hidden={qrCodeUrl}>
-                💡 <strong>UPI ID:</strong> {process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@paytm'}<br/>
+              }} hidden={qrCodeUrl || !process.env.REACT_APP_MERCHANT_UPI_ID}>
+                💡 <strong>UPI ID:</strong> {process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@yourbank'}<br/>
                 <small>Send payment directly to this UPI ID</small>
               </div>
               <button

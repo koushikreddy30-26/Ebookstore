@@ -8,7 +8,7 @@ A comprehensive eBook store built with the MERN stack (MongoDB, Express, React, 
 - 📚 Browse 100+ books across multiple genres
 - 🔍 Search and filter books by title, author, or genre
 - 🛒 Shopping cart functionality
-- 💳 Secure payment processing with Razorpay
+- 💳 Secure payment with Cash on Delivery (COD)
 - 📱 UPI QR code payment option
 - 📋 Order history tracking
 - 🔐 User authentication (register/login)
@@ -28,7 +28,6 @@ A comprehensive eBook store built with the MERN stack (MongoDB, Express, React, 
 - **Mongoose** - ODM
 - **JWT** - Authentication
 - **Bcrypt** - Password hashing
-- **Razorpay** - Payment gateway integration
 
 ### Frontend
 - **React** - UI library
@@ -52,7 +51,7 @@ ebookstore/
 │       ├── BookCard.js    # Individual book card component
 │       ├── BookPage.js    # Book details page
 │       ├── CartPage.js    # Shopping cart page
-│       ├── CheckoutPage.js # Checkout with Razorpay
+│       ├── CheckoutPage.js # Checkout with UPI/COD
 │       ├── OrderHistoryPage.js # User order history
 │       ├── LoginPage.js   # Login page
 │       ├── RegisterPage.js # Registration page
@@ -87,7 +86,6 @@ ebookstore/
 ### Prerequisites
 - Node.js (v14 or higher)
 - MongoDB (local or Atlas)
-- Razorpay account (for payment integration)
 
 ### Step 1: Clone the Repository
 ```bash
@@ -115,8 +113,6 @@ MONGO_URI=mongodb://localhost:27017/ebookstore
 # MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/ebookstore
 
 JWT_SECRET=your_jwt_secret_key_here
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret
 ```
 
 4. Seed the database with 100 books:

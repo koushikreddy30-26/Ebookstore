@@ -9,12 +9,6 @@ const BookListPage = () => {
   const [error, setError] = useState(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user && user.isAdmin) {
-      fetchBooks();
-    }
-  }, [user]);
-
   const fetchBooks = async () => {
     try {
       setLoading(true);
@@ -28,6 +22,12 @@ const BookListPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user && user.isAdmin) {
+      fetchBooks();
+    }
+  }, [user]);
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this book?')) {
@@ -51,7 +51,7 @@ const BookListPage = () => {
   return (
     <div>
       <h1>Book Management</h1>
-      <Link to="/admin/book/new" className="btn">Add New Book</Link>
+      <Link to="/admin/book/new" className="btn" style={{ marginBottom: '20px', display: 'inline-block' }}>Add New Book</Link>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
           <tr>
@@ -71,7 +71,7 @@ const BookListPage = () => {
               </td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{book.title}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{book.author}</td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>₹{(book.price * 83).toFixed(2)}</td>
+              <td style={{ border: '1px solid #ddd', padding: '8px' }}>${book.price.toFixed(2)}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{book.stock}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>
                 <Link to={`/admin/book/${book._id}/edit`} className="btn" style={{ marginRight: '10px' }}>Edit</Link>

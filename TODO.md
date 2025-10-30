@@ -24,7 +24,7 @@
 - [ ] Set Publish Directory: `build`
 - [ ] Add Environment Variables:
   - REACT_APP_API_URL: https://your-backend-render-url.onrender.com
-  - REACT_APP_MERCHANT_UPI_ID: your_upi_id@upi (replace with your actual UPI ID)
+  - [x] REACT_APP_MERCHANT_UPI_ID: your_upi_id@upi (replace with your actual UPI ID)
 - [ ] Deploy the site
 
 ## Step 4: Update Backend CLIENT_URL
