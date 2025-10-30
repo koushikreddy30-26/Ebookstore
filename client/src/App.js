@@ -8,7 +8,6 @@ import BookPage from './BookPage';
 import CartPage from './CartPage';
 import CheckoutPage from './CheckoutPage';
 import OrderHistoryPage from './OrderHistoryPage';
-import ReturnCancelPage from './ReturnCancelPage'; // Import the new page
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import BookListPage from './BookListPage';
@@ -27,7 +26,6 @@ function App() {
                 <Route path="/book/:id" element={<BookPage />} />
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/orders" element={<OrderHistoryPage />} />
-                <Route path="/return-cancel/:orderId" element={<ReturnCancelPage />} /> {/* Add this route */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/admin/books" element={<BookListPage />} />
