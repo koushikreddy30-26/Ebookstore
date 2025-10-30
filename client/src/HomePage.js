@@ -70,9 +70,13 @@ const HomePage = () => {
         </select>
       </div>
       <div className="book-grid">
-        {filteredBooks.map(book => (
-          <BookCard key={book._id} book={book} />
-        ))}
+        {filteredBooks.length === 0 ? (
+          <div>No books available. Please check back later.</div>
+        ) : (
+          filteredBooks.map(book => (
+            <BookCard key={book._id} book={book} />
+          ))
+        )}
       </div>
     </div>
   );
