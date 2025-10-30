@@ -20,8 +20,8 @@ const CheckoutPage = () => {
   }, [cartItems, navigate]);
 
   const generateUPIQR = async (orderId, amount) => {
-    const upiId = process.env.REACT_APP_MERCHANT_UPI_ID || 'merchant@upi';
-    const upiUrl = `upi://pay?pa=${upiId}&pn=Merchant&am=${amount}&cu=INR&tn=Order%20${orderId}`;
+    const upiId = process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@paytm'; // Replace with your actual UPI ID
+    const upiUrl = `upi://pay?pa=${upiId}&pn=eBook Store&am=${amount}&cu=INR&tn=Order%20${orderId}`;
     try {
       const qrCodeDataUrl = await QRCode.toDataURL(upiUrl);
       setQrCodeUrl(qrCodeDataUrl);
@@ -31,6 +31,13 @@ const CheckoutPage = () => {
   };
 
   const handlePayment = async (paymentMethod) => {
+    // Ensure the Razorpay Key ID is available
+    if (paymentMethod === 'razorpay' && !process.env.REACT_APP_RAZORPAY_KEY_ID) {
+      console.error('Razorpay Key ID is not set. Please check your .env file.');
+      alert('Online payment is currently unavailable. Please try Cash on Delivery instead.');
+      return;
+    }
+
     if (!user) {
       alert('Please login to proceed with payment');
       navigate('/login');
@@ -59,6 +66,19 @@ const CheckoutPage = () => {
         setPaymentSuccess(true);
         clearCart();
         setTimeout(() => navigate('/orders'), 2000);
+        return;
+      }
+
+      if (paymentMethod === 'upi') {
+        // UPI Payment - Create order and generate QR
+        const response = await api.post('/orders/create-cod', {
+          amount: total,
+          items
+        });
+        console.log('UPI Order created:', response.data);
+
+        // Generate UPI QR code for display
+        await generateUPIQR(response.data.order._id, total);
         return;
       }
 
@@ -153,12 +173,23 @@ const CheckoutPage = () => {
           <h2>Payment Options</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div style={{ border: '2px solid #28a745', borderRadius: '8px', padding: '15px', backgroundColor: '#f8fff8' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#28a745' }}>💳 Online Payment (Razorpay)</h3>
+              <h3 style={{ margin: '0 0 10px 0', color: '#28a745' }}>📱 UPI Payment</h3>
               <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#666' }}>
-                Pay securely with UPI, cards, net banking, or wallets
+                Pay directly using UPI ID or scan QR code with any UPI app
               </p>
+              <div style={{
+                backgroundColor: '#e8f5e8',
+                border: '1px solid #c3e6c3',
+                borderRadius: '4px',
+                padding: '10px',
+                marginBottom: '15px',
+                color: '#2d5a2d'
+              }}>
+                💡 <strong>UPI ID:</strong> {process.env.REACT_APP_MERCHANT_UPI_ID || 'your-upi-id@paytm'}<br/>
+                <small>Send payment directly to this UPI ID</small>
+              </div>
               <button
-                onClick={() => handlePayment('razorpay')}
+                onClick={() => handlePayment('upi')}
                 disabled={loading}
                 style={{
                   padding: '12px 24px',
@@ -172,7 +203,7 @@ const CheckoutPage = () => {
                   width: '100%'
                 }}
               >
-                {loading ? 'Processing...' : 'Pay Online Now'}
+                {loading ? 'Processing...' : 'Generate UPI QR Code'}
               </button>
               {qrCodeUrl && (
                 <div style={{ marginTop: '15px', textAlign: 'center' }}>

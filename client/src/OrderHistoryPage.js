@@ -81,7 +81,7 @@ const OrderHistoryPage = () => {
           }}>
             {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
           </span>
-          {order.orderStatus === 'confirmed' && (
+          {!['delivered', 'cancelled', 'returned'].includes(order.orderStatus) && (
             <button
               onClick={() => handleCancelOrder(order._id)}
               disabled={cancellingOrderId === order._id}
