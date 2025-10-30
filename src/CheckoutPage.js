@@ -20,7 +20,7 @@ const CheckoutPage = () => {
   }, [cartItems, navigate]);
 
   const generateUPIQR = async (orderId, amount) => {
-    const upiId = process.env.REACT_APP_MERCHANT_UPI_ID || 'merchant@upi';
+    const upiId = process.env.REACT_APP_RAZORPAY_UPI_ID || 'merchant@upi';
     const upiUrl = `upi://pay?pa=${upiId}&pn=Merchant&am=${amount}&cu=INR&tn=Order%20${orderId}`;
     try {
       const qrCodeDataUrl = await QRCode.toDataURL(upiUrl);
@@ -75,7 +75,7 @@ const CheckoutPage = () => {
 
       // Initialize Razorpay
       const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_your_key_id', // Fallback for safety
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'eBook Store',

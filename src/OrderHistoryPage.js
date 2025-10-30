@@ -11,18 +11,27 @@ const OrderHistoryPage = () => {
   const { user } = useAuth();
 
   const handleCancelOrder = async (orderId) => {
-    if (window.confirm('Are you sure you want to cancel this order?')) {
+    const reason = window.prompt('Please provide a reason for cancelling this order:');
+
+    if (reason === null) { // User clicked cancel on the prompt
+      return;
+    }
+
+    if (reason.trim() === '') {
+      alert('Cancellation reason cannot be empty.');
+      return;
+    }
+
       try {
-        await api.put(`/orders/${orderId}/cancel`);
+        await api.put(`/orders/${orderId}/cancel`, { reason });
         // Refresh orders
         const response = await api.get('/orders');
         setOrders(response.data);
         alert('Order cancelled successfully');
       } catch (err) {
         console.error('Error cancelling order:', err);
-        alert('Failed to cancel order');
+        alert(err.response?.data?.message || 'Failed to cancel order');
       }
-    }
   };
 
   const handleReturnOrder = async (orderId) => {
@@ -66,6 +75,127 @@ const OrderHistoryPage = () => {
   if (error) return <div>{error}</div>;
   if (!user) return <div>Please login to view your order history</div>;
 
+  // Separate orders by status
+  const activeOrders = orders.filter(order => !['cancelled', 'returned'].includes(order.orderStatus));
+  const cancelledOrders = orders.filter(order => order.orderStatus === 'cancelled');
+  const returnedOrders = orders.filter(order => order.orderStatus === 'returned');
+
+  const renderOrderCard = (order) => (
+    <div key={order._id} className="order-card" style={{
+      border: '1px solid #ccc',
+      padding: '15px',
+      margin: '15px 0',
+      borderRadius: '8px',
+      backgroundColor: '#f9f9f9'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <h3 style={{ margin: 0 }}>Order #{order._id.slice(-8)}</h3>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{
+            padding: '4px 8px',
+            borderRadius: '4px',
+            backgroundColor: order.orderStatus === 'delivered' ? '#28a745' :
+                           order.orderStatus === 'shipped' ? '#ffc107' :
+                           order.orderStatus === 'confirmed' ? '#007bff' :
+                           order.orderStatus === 'cancelled' ? '#dc3545' :
+                           order.orderStatus === 'returned' ? '#6f42c1' : '#6c757d',
+            color: 'white',
+            fontSize: '12px'
+          }}>
+            {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+          </span>
+
+          {/* Action buttons based on order status */}
+          {order.orderStatus === 'confirmed' && (
+          {(order.orderStatus === 'confirmed' || order.orderStatus === 'placed') && (
+            <button
+              onClick={() => handleCancelOrder(order._id)}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          )}
+
+          {order.orderStatus === 'delivered' && (
+            <button
+              onClick={() => navigate(`/return-cancel/${order._id}`)}
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#6f42c1',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              Return
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <p style={{ margin: 0 }}>
+          <strong>Payment:</strong> {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
+        </p>
+        <p style={{ margin: 0 }}>
+          <strong>Total:</strong> ${order.totalAmount?.toFixed(2)}
+        </p>
+      </div>
+
+      <p style={{ margin: '5px 0', color: '#666' }}>
+        <strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+      </p>
+
+      {order.orderStatus === 'cancelled' && order.cancellationReason && (
+        <p style={{ margin: '5px 0', color: '#dc3545', fontStyle: 'italic' }}>
+          <strong>Reason for cancellation:</strong> {order.cancellationReason}
+        </p>
+      )}
+
+      <h4 style={{ margin: '15px 0 10px 0' }}>Items:</h4>
+      <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '4px' }}>
+        {order.items.map((item, index) => (
+          <div key={index} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 0',
+            borderBottom: index < order.items.length - 1 ? '1px solid #eee' : 'none'
+          }}>
+            <div>
+              <strong>{item.title}</strong>
+              <br />
+              <span style={{ color: '#666', fontSize: '14px' }}>by {item.author}</span>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div>${item.price} × {item.quantity}</div>
+              <div style={{ fontWeight: 'bold' }}>${(item.price * item.quantity).toFixed(2)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* This is the content of your existing order card */}
+      {/* The code from line 81 to 207 will be moved inside here */}
+      {/* No changes needed inside the card itself */}
+    </div>
+  );
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>📚 Order History</h1>
@@ -76,111 +206,31 @@ const OrderHistoryPage = () => {
           <p>You haven't placed any orders yet. Start shopping to see your order history here!</p>
         </div>
       ) : (
-        orders.map(order => (
-          <div key={order._id} className="order-card" style={{
-            border: '1px solid #ccc',
-            padding: '15px',
-            margin: '15px 0',
-            borderRadius: '8px',
-            backgroundColor: '#f9f9f9'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <h3 style={{ margin: 0 }}>Order #{order._id.slice(-8)}</h3>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  backgroundColor: order.orderStatus === 'delivered' ? '#28a745' :
-                                 order.orderStatus === 'shipped' ? '#ffc107' :
-                                 order.orderStatus === 'confirmed' ? '#007bff' :
-                                 order.orderStatus === 'cancelled' ? '#dc3545' :
-                                 order.orderStatus === 'returned' ? '#6f42c1' : '#6c757d',
-                  color: 'white',
-                  fontSize: '12px'
-                }}>
-                  {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
-                </span>
-
-                {/* Action buttons based on order status */}
-                {order.orderStatus === 'confirmed' && (
-                  <button
-                    onClick={() => navigate(`/return-cancel/${order._id}`)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Cancel
-                  </button>
-                )}
-
-                {order.orderStatus === 'delivered' && (
-                  <button
-                    onClick={() => navigate(`/return-cancel/${order._id}`)}
-                    style={{
-                      padding: '4px 8px',
-                      backgroundColor: '#6f42c1',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Return
-                  </button>
-                )}
-              </div>
+        <>
+          {/* Active Orders Section */}
+          {activeOrders.length > 0 && (
+            <div style={{ marginBottom: '40px' }}>
+              <h2 style={{ color: '#007bff', borderBottom: '2px solid #007bff', paddingBottom: '10px' }}>📦 Active Orders</h2>
+              {activeOrders.map(order => renderOrderCard(order))}
             </div>
+          )}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <p style={{ margin: 0 }}>
-                <strong>Payment:</strong> {order.paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment'}
-              </p>
-              <p style={{ margin: 0 }}>
-                <strong>Total:</strong> ${order.totalAmount?.toFixed(2)}
-              </p>
+          {/* Cancelled Orders Section */}
+          {cancelledOrders.length > 0 && (
+            <div style={{ marginBottom: '40px' }}>
+              <h2 style={{ color: '#dc3545', borderBottom: '2px solid #dc3545', paddingBottom: '10px' }}>❌ Cancelled Orders</h2>
+              {cancelledOrders.map(order => renderOrderCard(order))}
             </div>
+          )}
 
-            <p style={{ margin: '5px 0', color: '#666' }}>
-              <strong>Date:</strong> {new Date(order.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </p>
-
-            <h4 style={{ margin: '15px 0 10px 0' }}>Items:</h4>
-            <div style={{ backgroundColor: 'white', padding: '10px', borderRadius: '4px' }}>
-              {order.items.map((item, index) => (
-                <div key={index} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '8px 0',
-                  borderBottom: index < order.items.length - 1 ? '1px solid #eee' : 'none'
-                }}>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <br />
-                    <span style={{ color: '#666', fontSize: '14px' }}>by {item.author}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div>${item.price} × {item.quantity}</div>
-                    <div style={{ fontWeight: 'bold' }}>${(item.price * item.quantity).toFixed(2)}</div>
-                  </div>
-                </div>
-              ))}
+          {/* Returned Orders Section */}
+          {returnedOrders.length > 0 && (
+            <div style={{ marginBottom: '40px' }}>
+              <h2 style={{ color: '#6f42c1', borderBottom: '2px solid #6f42c1', paddingBottom: '10px' }}>↩️ Returned Orders</h2>
+              {returnedOrders.map(order => renderOrderCard(order))}
             </div>
-          </div>
-        ))
+          )}
+        </>
       )}
     </div>
   );

@@ -6,6 +6,7 @@ const OrderHistoryPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancellingOrderId, setCancellingOrderId] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -39,6 +40,23 @@ const OrderHistoryPage = () => {
   const cancelledOrders = orders.filter(order => order.orderStatus === 'cancelled');
   const returnedOrders = orders.filter(order => order.orderStatus === 'returned');
 
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return;
+
+    setCancellingOrderId(orderId);
+    try {
+      await api.put(`/orders/${orderId}/cancel`, { reason: 'Cancelled by user' });
+      // Refresh orders
+      const response = await api.get('/orders');
+      setOrders(response.data);
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      alert('Failed to cancel order');
+    } finally {
+      setCancellingOrderId(null);
+    }
+  };
+
   const renderOrderCard = (order) => (
     <div key={order._id} className="order-card" style={{
       border: '1px solid #ccc',
@@ -63,8 +81,23 @@ const OrderHistoryPage = () => {
           }}>
             {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
           </span>
-
-
+          {order.orderStatus === 'confirmed' && (
+            <button
+              onClick={() => handleCancelOrder(order._id)}
+              disabled={cancellingOrderId === order._id}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: cancellingOrderId === order._id ? 'not-allowed' : 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              {cancellingOrderId === order._id ? 'Cancelling...' : 'Cancel Order'}
+            </button>
+          )}
         </div>
       </div>
 
