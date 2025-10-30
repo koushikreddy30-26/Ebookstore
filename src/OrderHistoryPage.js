@@ -106,7 +106,6 @@ const OrderHistoryPage = () => {
           </span>
 
           {/* Action buttons based on order status */}
-          {order.orderStatus === 'confirmed' && (
           {(order.orderStatus === 'confirmed' || order.orderStatus === 'placed') && (
             <button
               onClick={() => handleCancelOrder(order._id)}
