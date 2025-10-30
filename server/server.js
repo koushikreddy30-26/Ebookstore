@@ -43,15 +43,8 @@ app.use('/api/books', bookRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/orders', orderRoutes);
 
-// Serve frontend for production
-if (process.env.NODE_ENV === 'production') {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '../client/build/index.html')));
-} else {
-  // Route for development
-  app.get('/', (req, res) => res.send('API is running...'));
-}
+// API only - frontend deployed separately
+app.get('/', (req, res) => res.send('API is running...'));
 
 // Error Handling (Simple)
 app.use((err, req, res, next) => {
