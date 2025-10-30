@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from './CartContext';
+import { useAuth } from './AuthContext';
 import api from './api';
 
 const BookPage = () => {
