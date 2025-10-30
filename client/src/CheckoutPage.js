@@ -30,97 +30,6 @@ const CheckoutPage = () => {
     }
   };
 
-  const loadRazorpay = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-
-  const handleRazorpayPayment = async () => {
-    if (!user) {
-      alert('Please login to proceed with payment');
-      navigate('/login');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const total = getCartTotal();
-      const items = cartItems.map(item => ({
-        book: item._id,
-        title: item.title,
-        author: item.author,
-        price: item.price,
-        quantity: item.quantity
-      }));
-
-      // Create Razorpay order
-      const response = await api.post('/payments/create-order', {
-        amount: total,
-        items
-      });
-
-      const { order } = response.data;
-
-      const res = await loadRazorpay();
-      if (!res) {
-        alert('Razorpay SDK failed to load. Are you online?');
-        return;
-      }
-
-      const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_default',
-        amount: order.amount,
-        currency: order.currency,
-        name: 'eBook Store',
-        description: 'Purchase eBooks',
-        order_id: order.id,
-        handler: async function (response) {
-          try {
-            // Verify payment
-            const verifyResponse = await api.post('/payments/verify', {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              orderId: order._id
-            });
-
-            if (verifyResponse.data.success) {
-              setPaymentSuccess(true);
-              clearCart();
-              setTimeout(() => navigate('/orders'), 2000);
-            } else {
-              alert('Payment verification failed');
-            }
-          } catch (error) {
-            console.error('Payment verification error:', error);
-            alert('Payment verification failed');
-          }
-        },
-        prefill: {
-          name: user.username,
-          email: user.email,
-        },
-        theme: {
-          color: '#3399cc',
-        },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
-    } catch (error) {
-      console.error('Payment error:', error);
-      alert('Payment failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handlePayment = async (paymentMethod) => {
     if (!user) {
       alert('Please login to proceed with payment');
@@ -155,13 +64,13 @@ const CheckoutPage = () => {
 
       if (paymentMethod === 'upi') {
         // UPI Payment - Create order and generate QR
-        const response = await api.post('/orders/create-cod', {
-          amount: total, // The backend should handle currency conversion if needed
+        const response = await api.post('/payments/create-order', {
+          amount: total,
           items,
-          paymentMethod: 'upi' // Explicitly set payment method
+          paymentMethod: 'upi'
         });
         console.log('UPI Order created:', response.data);
-        await generateUPIQR(response.data.order._id, total * 83); // Convert to INR for QR code
+        await generateUPIQR(response.data.orderId, total);
         return;
       }
     } catch (error) {
@@ -206,29 +115,7 @@ const CheckoutPage = () => {
         <div style={{ flex: 1 }}>
           <h2>Payment Options</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ border: '2px solid #28a745', borderRadius: '8px', padding: '15px', backgroundColor: '#f8fff8' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#28a745' }}>💳 Razorpay Payment</h3>
-              <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#666' }}>
-                Secure online payment powered by Razorpay
-              </p>
-              <button
-                onClick={handleRazorpayPayment}
-                disabled={loading}
-                style={{
-                  padding: '12px 24px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  width: '100%'
-                }}
-              >
-                {loading ? 'Processing...' : 'Pay with Razorpay'}
-              </button>
-            </div>
+
 
             <div style={{ border: '2px solid #ffc107', borderRadius: '8px', padding: '15px', backgroundColor: '#fffbf0' }}>
               <h3 style={{ margin: '0 0 10px 0', color: '#ffc107' }}>📱 UPI / QR Code Payment</h3>
